@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS ltree;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-CREATE TABLE folders (
+CREATE TABLE IF NOT EXISTS folders (
   id uuid PRIMARY KEY,
   parent_id uuid REFERENCES folders (id) ON DELETE CASCADE,
   name text NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE folders (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE files (
+CREATE TABLE IF NOT EXISTS files (
   id uuid PRIMARY KEY,
   folder_id uuid NOT NULL REFERENCES folders (id) ON DELETE CASCADE,
   name text NOT NULL,
@@ -23,5 +23,5 @@ CREATE TABLE files (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX folders_parent_name_id_idx ON folders (parent_id, name, id);
-CREATE INDEX files_folder_name_id_idx ON files (folder_id, name, id);
+CREATE INDEX IF NOT EXISTS folders_parent_name_id_idx ON folders (parent_id, name, id);
+CREATE INDEX IF NOT EXISTS files_folder_name_id_idx ON files (folder_id, name, id);
