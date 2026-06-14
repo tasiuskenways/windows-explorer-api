@@ -10,7 +10,8 @@ Stack: Bun · TypeScript (strict) · Elysia · Drizzle ORM · PostgreSQL (`ltree
 
 ```bash
 cp .env.example .env
-docker compose up -d postgres
+# start a Postgres reachable at DATABASE_URL (ltree + pg_trgm ship with the official image):
+docker run -d --name explorer-pg -e POSTGRES_USER=explorer -e POSTGRES_PASSWORD=explorer -e POSTGRES_DB=explorer -p 5432:5432 postgres:17
 bun install
 bun run db:migrate
 bun run db:seed
