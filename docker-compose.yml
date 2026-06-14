@@ -12,5 +12,18 @@ services:
       interval: 3s
       timeout: 3s
       retries: 10
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgres://explorer:explorer@postgres:5432/explorer
+      API_PORT: "3000"
+      WEB_ORIGIN: http://localhost:5173
+    ports: ["3000:3000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "bun src/infrastructure/db/migrate.ts && bun src/index.ts"
+
 volumes:
   pgdata:
