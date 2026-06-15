@@ -16,10 +16,17 @@ const folderRepo = (exists: boolean): FolderRepository => ({
   findManyByIds: async () => [],
   findAncestors: async () => [],
   findSubtree: async () => [],
+  findNamesByParent: async () => [],
+  createChild: async () => { throw new Error("not used"); },
+  rename: async () => { throw new Error("not used"); },
 });
 
 const fileRepo: FileRepository = {
   findByFolder: async () => ({ items: [{ id: "f", folderId: "root", name: "f.txt", extension: "txt", sizeBytes: 1, createdAt: new Date(0), updatedAt: new Date(0) }], hasMore: false }),
+  findById: async () => null,
+  findNamesByFolder: async () => [],
+  create: async () => { throw new Error("not used"); },
+  rename: async () => { throw new Error("not used"); },
 };
 
 test("assembles folder + child folders + files", async () => {

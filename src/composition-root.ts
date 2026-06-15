@@ -8,6 +8,8 @@ import { getFolderContents } from "./application/use-cases/get-folder-contents.t
 import { getBreadcrumbs } from "./application/use-cases/get-breadcrumbs.ts";
 import { getFullTree } from "./application/use-cases/get-full-tree.ts";
 import { search } from "./application/use-cases/search.ts";
+import { createFolder, renameFolder } from "./application/use-cases/create-folder.ts";
+import { createFile, renameFile } from "./application/use-cases/create-file.ts";
 import type { Db } from "./infrastructure/db/client.ts";
 
 export const buildContainer = (database: Db = db) => {
@@ -21,6 +23,10 @@ export const buildContainer = (database: Db = db) => {
     getBreadcrumbs: getBreadcrumbs(folders),
     getFullTree: getFullTree(folders),
     search: search(searchRepo, folders),
+    createFolder: createFolder(folders),
+    renameFolder: renameFolder(folders),
+    createFile: createFile(folders, files),
+    renameFile: renameFile(files),
   };
 };
 export type Container = ReturnType<typeof buildContainer>;

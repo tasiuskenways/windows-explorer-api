@@ -3,6 +3,7 @@ import type { Container } from "../../composition-root.ts";
 import { config } from "../../config.ts";
 import { parsePage } from "../parse-page.ts";
 import { encodeCursor } from "../../application/pagination-cursor.ts";
+import { CreateItemRequestSchema, RenameItemRequestSchema } from "../../contracts/schemas.ts";
 
 const bounds = { def: config.defaultPageLimit, max: config.maxPageLimit };
 const pageQuery = t.Object({ limit: t.Optional(t.String()), cursor: t.Optional(t.String()) });
@@ -27,10 +28,22 @@ export const folderRoutes = (c: Container) =>
       return { data: r.items, pageInfo: { hasMore: r.hasMore, nextCursor: nextCursorOf(r) } };
     }, { query: pageQuery })
 
+    .post("/:id/folders", async ({ params, body }) =>
+      ({ data: await c.createFolder(params.id, body.name) }), { body: CreateItemRequestSchema })
+
+    .patch("/:id", async ({ params, body }) =>
+      ({ data: await c.renameFolder(params.id, body.name) }), { body: RenameItemRequestSchema })
+
     .get("/:id/files", async ({ params, query }) => {
       const r = await c.getFolderContents(params.id, parsePage(query, bounds).limit);
       return r.files;
     }, { query: pageQuery })
+
+    .post("/:id/files", async ({ params, body }) =>
+      ({ data: await c.createFile(params.id, body.name) }), { body: CreateItemRequestSchema })
+
+    .patch("/:id/files/:fileId", async ({ params, body }) =>
+      ({ data: await c.renameFile(params.fileId, body.name) }), { body: RenameItemRequestSchema })
 
     .get("/:id/contents", async ({ params, query }) =>
       c.getFolderContents(params.id, parsePage(query, bounds).limit), { query: pageQuery })

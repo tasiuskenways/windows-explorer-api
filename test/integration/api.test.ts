@@ -23,6 +23,12 @@ beforeAll(async () => {
 afterAll(() => tdb?.stop(), 60000);
 
 const get = (path: string) => app.handle(new Request(`http://localhost/api/v1${path}`));
+const jsonRequest = (path: string, method: "POST" | "PATCH", body: unknown) =>
+  app.handle(new Request(`http://localhost/api/v1${path}`, {
+    method,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  }));
 
 test("GET /folders/roots returns the root with hasChildren", async () => {
   const body = await (await get("/folders/roots")).json();
@@ -44,6 +50,26 @@ test("GET /folders/:id/breadcrumbs returns root->child chain", async () => {
 test("GET /folders/:id/contents 404s for unknown id", async () => {
   const res = await get(`/folders/${uuidv7()}/contents`);
   expect(res.status).toBe(404);
+});
+
+test("POST /folders/:id/folders creates a child folder with a Windows default name", async () => {
+  const body = await (await jsonRequest(`/folders/${root}/folders`, "POST", {})).json();
+  expect(body.data).toMatchObject({ parentId: root, name: "New folder" });
+});
+
+test("POST /folders/:id/files creates a text document with a Windows default name", async () => {
+  const body = await (await jsonRequest(`/folders/${root}/files`, "POST", {})).json();
+  expect(body.data).toMatchObject({ folderId: root, name: "New Text Document.txt", extension: "txt" });
+});
+
+test("PATCH folder and file routes rename existing items", async () => {
+  const createdFolder = await (await jsonRequest(`/folders/${root}/folders`, "POST", {})).json();
+  const folderBody = await (await jsonRequest(`/folders/${createdFolder.data.id}`, "PATCH", { name: "Renamed child" })).json();
+  expect(folderBody.data).toMatchObject({ id: createdFolder.data.id, name: "Renamed child" });
+
+  const file = await (await jsonRequest(`/folders/${root}/files`, "POST", {})).json();
+  const fileBody = await (await jsonRequest(`/folders/${root}/files/${file.data.id}`, "PATCH", { name: "Notes.md" })).json();
+  expect(fileBody.data).toMatchObject({ name: "Notes.md", extension: "md" });
 });
 
 test("GET /search finds the child and includes its ancestors", async () => {

@@ -4,6 +4,7 @@ import { folders } from "../db/schema.ts";
 import type { FolderRepository } from "../../application/ports/folder-repository.ts";
 import type { PageQuery, Keyset } from "../../application/ports/pagination.ts";
 import { folderRowToRecord, folderExecRowToRecord } from "./row-mappers.ts";
+import { buildPath } from "../../domain/ltree-path.ts";
 
 const after = (k: Keyset | null) =>
   k ? or(gt(folders.name, k.name), and(eq(folders.name, k.name), gt(folders.id, k.id))) : undefined;
@@ -58,5 +59,38 @@ export const createFolderRepository = (db: Db): FolderRepository => ({
           WHERE r.id = ${rootId} ORDER BY d.path LIMIT ${maxNodes}`)
       : await db.execute(raw`SELECT * FROM folders ORDER BY path LIMIT ${maxNodes}`)) as unknown as Record<string, unknown>[];
     return rows.map(folderExecRowToRecord);
+  },
+
+  async findNamesByParent(parentId) {
+    const rows = await db.select({ id: folders.id, name: folders.name }).from(folders)
+      .where(parentId ? eq(folders.parentId, parentId) : isNull(folders.parentId));
+    return rows;
+  },
+
+  async createChild({ id, parent, name }) {
+    const now = new Date();
+    const [row] = await db.insert(folders).values({
+      id,
+      parentId: parent.id,
+      name,
+      path: buildPath(parent.path, id),
+      depth: parent.depth + 1,
+      subfolderCount: 0,
+      fileCount: 0,
+      createdAt: now,
+      updatedAt: now,
+    }).returning();
+    await db.update(folders)
+      .set({ subfolderCount: raw`${folders.subfolderCount} + 1`, updatedAt: now })
+      .where(eq(folders.id, parent.id));
+    return folderRowToRecord(row!);
+  },
+
+  async rename(id, name) {
+    const [row] = await db.update(folders)
+      .set({ name, updatedAt: new Date() })
+      .where(eq(folders.id, id))
+      .returning();
+    return row ? folderRowToRecord(row) : null;
   },
 });

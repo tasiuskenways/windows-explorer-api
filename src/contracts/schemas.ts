@@ -60,6 +60,16 @@ export const FolderContentsSchema = Type.Object({
 });
 export type FolderContents = Static<typeof FolderContentsSchema>;
 
+export const CreateItemRequestSchema = Type.Object({
+  name: Type.Optional(Type.String()),
+});
+export type CreateItemRequest = Static<typeof CreateItemRequestSchema>;
+
+export const RenameItemRequestSchema = Type.Object({
+  name: Type.String(),
+});
+export type RenameItemRequest = Static<typeof RenameItemRequestSchema>;
+
 export const ApiErrorSchema = Type.Object({
   error: Type.Object({
     code: Type.String(),
