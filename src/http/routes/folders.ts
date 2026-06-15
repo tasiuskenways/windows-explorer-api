@@ -34,6 +34,12 @@ export const folderRoutes = (c: Container) =>
     .patch("/:id", async ({ params, body }) =>
       ({ data: await c.renameFolder(params.id, body.name) }), { body: RenameItemRequestSchema })
 
+    .delete("/:id", async ({ params, set }) => {
+      await c.deleteFolder(params.id);
+      set.status = 204;
+      return undefined;
+    })
+
     .get("/:id/files", async ({ params, query }) => {
       const r = await c.getFolderContents(params.id, parsePage(query, bounds).limit);
       return r.files;
@@ -44,6 +50,12 @@ export const folderRoutes = (c: Container) =>
 
     .patch("/:id/files/:fileId", async ({ params, body }) =>
       ({ data: await c.renameFile(params.fileId, body.name) }), { body: RenameItemRequestSchema })
+
+    .delete("/:id/files/:fileId", async ({ params, set }) => {
+      await c.deleteFile(params.fileId);
+      set.status = 204;
+      return undefined;
+    })
 
     .get("/:id/contents", async ({ params, query }) =>
       c.getFolderContents(params.id, parsePage(query, bounds).limit), { query: pageQuery })

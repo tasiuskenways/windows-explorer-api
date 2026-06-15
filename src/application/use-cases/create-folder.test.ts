@@ -29,6 +29,7 @@ const repo = (siblings: NamedItem[] = [], parent: FolderRecord | null = folderRe
   findNamesByParent: async () => siblings,
   createChild: async ({ id, parent, name }) => folderRec(id, parent.id, name, parent.depth + 1),
   rename: async (id, name) => folderRec(id, parentId, name, 1),
+  delete: async () => { throw new Error("not used"); },
 });
 
 test("createFolder uses the next Windows default name", async () => {

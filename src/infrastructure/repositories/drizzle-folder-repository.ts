@@ -93,4 +93,18 @@ export const createFolderRepository = (db: Db): FolderRepository => ({
       .returning();
     return row ? folderRowToRecord(row) : null;
   },
+
+  async delete(id) {
+    const [folder] = await db.select().from(folders).where(eq(folders.id, id)).limit(1);
+    if (!folder) return false;
+
+    const now = new Date();
+    await db.delete(folders).where(eq(folders.id, id));
+    if (folder.parentId) {
+      await db.update(folders)
+        .set({ subfolderCount: raw`GREATEST(${folders.subfolderCount} - 1, 0)`, updatedAt: now })
+        .where(eq(folders.id, folder.parentId));
+    }
+    return true;
+  },
 });

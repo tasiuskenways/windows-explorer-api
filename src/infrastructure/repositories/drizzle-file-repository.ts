@@ -51,4 +51,16 @@ export const createFileRepository = (db: Db): FileRepository => ({
       .returning();
     return row ? fileRowToRecord(row) : null;
   },
+
+  async delete(id) {
+    const [file] = await db.select().from(files).where(eq(files.id, id)).limit(1);
+    if (!file) return false;
+
+    const now = new Date();
+    await db.delete(files).where(eq(files.id, id));
+    await db.update(folders)
+      .set({ fileCount: raw`GREATEST(${folders.fileCount} - 1, 0)`, updatedAt: now })
+      .where(eq(folders.id, file.folderId));
+    return true;
+  },
 });

@@ -12,4 +12,5 @@ export interface FileRepository {
   findNamesByFolder(folderId: string): Promise<NamedItem[]>;
   create(input: { id: string; folderId: string; name: string; extension: string | null }): Promise<FileRecord>;
   rename(id: string, name: string, extension: string | null): Promise<FileRecord | null>;
+  delete(id: string): Promise<boolean>;
 }

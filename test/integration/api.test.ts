@@ -23,6 +23,7 @@ beforeAll(async () => {
 afterAll(() => tdb?.stop(), 60000);
 
 const get = (path: string) => app.handle(new Request(`http://localhost/api/v1${path}`));
+const remove = (path: string) => app.handle(new Request(`http://localhost/api/v1${path}`, { method: "DELETE" }));
 const jsonRequest = (path: string, method: "POST" | "PATCH", body: unknown) =>
   app.handle(new Request(`http://localhost/api/v1${path}`, {
     method,
@@ -70,6 +71,18 @@ test("PATCH folder and file routes rename existing items", async () => {
   const file = await (await jsonRequest(`/folders/${root}/files`, "POST", {})).json();
   const fileBody = await (await jsonRequest(`/folders/${root}/files/${file.data.id}`, "PATCH", { name: "Notes.md" })).json();
   expect(fileBody.data).toMatchObject({ name: "Notes.md", extension: "md" });
+});
+
+test("DELETE folder and file routes remove existing items", async () => {
+  const createdFolder = await (await jsonRequest(`/folders/${root}/folders`, "POST", {})).json();
+  const createdFile = await (await jsonRequest(`/folders/${root}/files`, "POST", {})).json();
+
+  expect((await remove(`/folders/${createdFolder.data.id}`)).status).toBe(204);
+  expect((await remove(`/folders/${root}/files/${createdFile.data.id}`)).status).toBe(204);
+
+  const contents = await (await get(`/folders/${root}/contents`)).json();
+  expect(contents.folders.data.some((f: { id: string }) => f.id === createdFolder.data.id)).toBe(false);
+  expect(contents.files.data.some((f: { id: string }) => f.id === createdFile.data.id)).toBe(false);
 });
 
 test("GET /search finds the child and includes its ancestors", async () => {

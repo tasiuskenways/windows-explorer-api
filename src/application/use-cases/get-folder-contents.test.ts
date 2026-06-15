@@ -19,6 +19,7 @@ const folderRepo = (exists: boolean): FolderRepository => ({
   findNamesByParent: async () => [],
   createChild: async () => { throw new Error("not used"); },
   rename: async () => { throw new Error("not used"); },
+  delete: async () => { throw new Error("not used"); },
 });
 
 const fileRepo: FileRepository = {
@@ -27,6 +28,7 @@ const fileRepo: FileRepository = {
   findNamesByFolder: async () => [],
   create: async () => { throw new Error("not used"); },
   rename: async () => { throw new Error("not used"); },
+  delete: async () => { throw new Error("not used"); },
 };
 
 test("assembles folder + child folders + files", async () => {

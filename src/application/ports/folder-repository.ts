@@ -16,4 +16,5 @@ export interface FolderRepository {
   findNamesByParent(parentId: string | null): Promise<NamedItem[]>;
   createChild(input: { id: string; parent: FolderRecord; name: string }): Promise<FolderRecord>;
   rename(id: string, name: string): Promise<FolderRecord | null>;
+  delete(id: string): Promise<boolean>;
 }

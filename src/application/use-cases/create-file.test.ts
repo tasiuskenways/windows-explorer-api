@@ -41,6 +41,7 @@ const folderRepo = (parent: FolderRecord | null = folderRec(folderId)): FolderRe
   findNamesByParent: async () => [],
   createChild: async () => { throw new Error("not used"); },
   rename: async () => { throw new Error("not used"); },
+  delete: async () => { throw new Error("not used"); },
 });
 
 const fileRepo = (siblings: NamedItem[] = []): FileRepository => ({
@@ -49,6 +50,7 @@ const fileRepo = (siblings: NamedItem[] = []): FileRepository => ({
   create: async ({ id, name }) => fileRec(id, name),
   findById: async (id) => fileRec(id, "Existing.txt"),
   rename: async (id, name) => fileRec(id, name),
+  delete: async () => { throw new Error("not used"); },
 });
 
 test("createFile uses the next Windows text document name", async () => {
